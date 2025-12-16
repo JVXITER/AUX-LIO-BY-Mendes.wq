@@ -1,0 +1,2 @@
+# AUX-LIO-BY-Mendes.wq
+ 🎯 AUXÍLIO PARA MELHORAR SUA MIRA 🎯
