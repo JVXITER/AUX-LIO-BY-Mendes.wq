@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width" />
+  <title></title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1></h1>
+  <div id=""></div>
+
+  <script src="script.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Panel - Pro Version</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0a001a 0%, #1a0033 50%, #2e004f 100%);
+            color: #d8b4fe;
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* TELA DE LOGIN */
+        #login-screen {
+            width: 85%;
+            max-width: 320px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 12px;
+            z-index: 100;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #110022;
+            border: 1px solid #7e22ce;
+            color: #f3e8ff;
+            font-family: 'Fira Code', monospace;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #7e22ce;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        /* PAINEL PRINCIPAL */
+        #main-panel {
+            display: none;
+            width: 95%;
+            max-width: 380px;
+        }
+
+        /* ABA DE INFORMAÇÕES MELHORADA */
+        .info-panel {
+            background: rgba(20, 0, 40, 0.9);
+            border: 1.5px solid #d8b4fe;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(216, 180, 254, 0.2);
+        }
+
+        .info-panel h2 {
+            text-align: center;
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #fff;
+            text-shadow: 0 0 5px #d8b4fe;
+            border-bottom: 1px solid rgba(216, 180, 254, 0.3);
+            padding-bottom: 5px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .status-item { color: #a855f7; font-weight: bold; }
+        .status-value { color: #f3e8ff; text-align: right; }
+
+        /* GRID DE BOTÕES */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .btn {
+            background: rgba(46, 0, 79, 0.8);
+            border: 1.5px solid #a855f7;
+            padding: 20px 5px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #d8b4fe;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* FLASH ROXO CLARO AO ATIVAR */
+        .btn.active {
+            background: #f3e8ff !important;
+            color: #2e004f !important;
+            box-shadow: 0 0 25px #f3e8ff;
+            transform: scale(0.96);
+        }
+
+        #console {
+            margin-top: 15px;
+            background: #000;
+            border: 1px solid #581c87;
+            height: 70px;
+            padding: 10px;
+            font-size: 10px;
+            border-radius: 8px;
+            color: #d8b4fe;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <h1 style="font-size: 1.2rem; color: #d8b4fe;">FFH4X VIP</h1>
+    <input type="text" id="user" placeholder="ADD_KEY">
+    <input type="password" id="pass" placeholder="ACCESS_KEY">
+    <button class="login-btn" onclick="validateLogin()">ACESSAR</button>
+</div>
+
+<div id="main-panel">
+    <div class="info-panel">
+        <h2>FFH4X AUX VIP</h2>
+        <div class="status-grid">
+            <span class="status-item">CREATOR:</span>
+            <span class="status-value">@mendes.wq</span>
+            
+            <span class="status-item">STATUS:</span>
+            <span class="status-value" style="color: #39ff14;">● ONLINE</span>
+            
+            <span class="status-item">USER_ID:</span>
+            <span class="status-value">MEN-9921-PD</span>
+            
+            <span class="status-item">SECURITY:</span>
+            <span class="status-value">8 / 10</span>
+
+            <span class="status-item">OWNER:</span>
+            <span class="status-value">MENDES</span>
+
+            <span class="status-item">TIME & KAY:</span>
+            <span class="status-value" id="clock">00:00:00</span>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="btn" onclick="runFunction(this, 'Suavizar Mira Actvado')">Suavizar Mira</div>
+        <div class="btn" onclick="runFunction(this, 'Grudar Mira Actvado')">Grudar Mira</div>
+        <div class="btn" onclick="runFunction(this, 'Zero Recuo Actvado')">Zero Recuo</div>
+        <div class="btn" onclick="logAction(this, 'Aim Assistent Actvado')">Aim Assistent</div>
+        <div class="btn" onclick="logAction(this, 'Aim Macro Actvado')">Aim Macro</div>
+        <div class="btn" onclick="logAction(this, 'Aim Lock Actvado')">Aim Lock</div>
+    </div>
+
+    <div id="console">> FUNÇÕES OFF</div>
+</div>
+
+<script>
+    function validateLogin() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        if (u === "VIP" && p === "WIDJ-91N7-MEN") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-panel').style.display = 'block';
+            startClock();
+        } else {
+            alert("CREDENCIAIS INCORRETAS");
+        }
+    }
+
+    function startClock() {
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
+    }
+
+    function logAction(element, name) {
+        element.classList.add('active');
+        const consoleEl = document.getElementById('console');
+        consoleEl.innerHTML = `> RUNNING: ${name}...<br>`;
+        
+        setTimeout(() => {
+            element.classList.remove('active');
+            consoleEl.innerHTML += `> <span style="color:#fff">SUCCESS: FUNÇÕES COMPLED.</span>`;
+        }, 400);
+    }
+
+    // Alias para os botões que usavam runFunction
+    function runFunction(e, n) { logAction(e, n); }
+</script>
+
+</body>
+</html>
