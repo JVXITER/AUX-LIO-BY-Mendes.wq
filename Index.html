@@ -1,0 +1,416 @@
+ 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>AUXILIO VIP </title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:black;overflow:hidden;font-family:Arial}
+canvas{position:fixed;inset:0;z-index:-1}
+
+.painel{
+  position:fixed;inset:0;
+  display:flex;justify-content:center;align-items:center;
+  filter:blur(6px);pointer-events:none;transition:.3s
+}
+.painel.liberado{filter:none;pointer-events:auto}
+
+.box{
+  width:380px;
+  background:#160022;
+  border-radius:18px;
+  box-shadow:0 0 40px #8a2be2;
+  overflow:hidden;
+  transition:.3s
+}
+
+.tabs{display:flex;background:#220033}
+.tab{
+  flex:1;padding:12px;text-align:center;
+  cursor:pointer;color:#cfa8ff;
+  font-weight:bold;font-size:13px
+}
+.tab.ativa{background:#8a2be2;color:white}
+
+.conteudo{display:none;padding:18px;color:white}
+.conteudo.ativo{display:block}
+
+.btn{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border:none;
+  border-radius:10px;
+  background:#2a0044;
+  color:#d6b3ff;
+  font-weight:bold;
+  cursor:pointer
+}
+.btn.ativo{background:#8a2be2;color:white}
+
+.login{
+  position:fixed;inset:0;
+  display:flex;justify-content:center;align-items:center;
+  background:rgba(0,0,0,.7);
+  backdrop-filter:blur(6px);
+  z-index:10
+}
+.login-box{
+  background:#160022;
+  padding:25px;
+  width:320px;
+  border-radius:18px;
+  text-align:center;
+  box-shadow:0 0 40px #8a2be2
+}
+.login-box input{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:10px;
+  border:none;
+  background:#2a0044;
+  color:white
+}
+.login-box button{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border:none;
+  border-radius:10px;
+  background:#8a2be2;
+  color:white;
+  font-weight:bold
+}
+.gerar{
+  margin-top:8px;
+  font-size:12px;
+  color:#cfa8ff;
+  cursor:pointer
+}
+
+.notif{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#2a0044;
+  color:white;
+  padding:10px 15px;
+  border-radius:10px;
+  box-shadow:0 0 15px #8a2be2;
+  animation:subir 3s forwards
+}
+@keyframes subir{
+  0%{opacity:0;transform:translateY(20px)}
+  10%{opacity:1}
+  90%{opacity:1}
+  100%{opacity:0;transform:translateY(-10px)}
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="painel" id="painel">
+  <div class="box">
+    <div class="tabs">
+      <div class="tab ativa" onclick="abrir(0)">FUNCTIONS</div>
+      <div class="tab" onclick="abrir(1)">TOOLS</div>
+      <div class="tab" onclick="abrir(2)">CONFIG</div>
+      <div class="tab" onclick="abrir(3)">INFO</div>
+      <div class="tab" id="tabAdmin" onclick="abrir(4)" style="display:none">ADMIN</div>
+    </div>
+
+    <div class="conteudo ativo" id="functions"></div>
+    <div class="conteudo" id="tools"></div>
+    <div class="conteudo" id="config"></div>
+    <div class="conteudo" id="info"></div>
+    <div class="conteudo" id="admin"></div>
+  </div>
+</div>
+
+<div class="login" id="login">
+  <div class="login-box">
+    <h2 style="color:white">LOGIN</h2>
+    <input id="user" placeholder="Usuário">
+    <input id="pass" type="password" placeholder="Senha">
+    <button onclick="entrar()">Entrar</button>
+    <button onclick="salvarLogin()">Salvar login</button>
+    <div class="gerar" onclick="gerarLogin()">Gerar Login e Senha</div>
+    <div id="cred" style="font-size:12px;color:white"></div>
+  </div>
+</div>
+
+<script>
+/* ===== ADMIN ===== */
+const ADMIN_USER="mendesRkTqAz";
+const ADMIN_PASS="59018372";
+
+/* ===== DEVICE ===== */
+let deviceId=localStorage.getItem("deviceId")||("dev-"+Math.random().toString(36).slice(2));
+localStorage.setItem("deviceId",deviceId);
+
+/* ===== MATRIX ===== */
+const c=document.getElementById("matrix"),ctx=c.getContext("2d");
+function resize(){c.width=innerWidth;c.height=innerHeight}
+resize();addEventListener("resize",resize);
+const chars="01ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%";
+let drops=Array(Math.floor(innerWidth/16)).fill(0);
+setInterval(()=>{
+ctx.fillStyle="rgba(0,0,0,.15)";
+ctx.fillRect(0,0,c.width,c.height);
+ctx.fillStyle="#9b5cff";
+ctx.font="16px monospace";
+drops.forEach((y,i)=>{
+ctx.fillText(chars[Math.random()*chars.length|0],i*16,y*16);
+drops[i]=y*16>c.height&&Math.random()>.97?0:y+1;
+});
+},50);
+
+/* ===== NOTIF ===== */
+function notificar(t){
+const n=document.createElement("div");
+n.className="notif";
+n.textContent=t;
+document.body.appendChild(n);
+setTimeout(()=>n.remove(),3000);
+}
+
+/* ===== LOGIN ===== */
+let login={u:"",p:""};
+let tempo = 0;
+let timer = null;
+let inicioSessao = 0;
+
+function gerarLogin(){
+login.u="mendes-"+Math.random().toString(36).slice(2,8);
+login.p=Math.random().toString(36).slice(2,10);
+cred.innerHTML=`Usuário: <b>${login.u}</b><br>Senha: <b>${login.p}</b>`;
+}
+
+function salvarLogin(){
+localStorage.setItem("loginSalvo",JSON.stringify({u:user.value,p:pass.value}));
+notificar("Login salvo");
+}
+
+/* LOGIN SALVO */
+(function(){
+const d=JSON.parse(localStorage.getItem("loginSalvo")||"null");
+if(d){user.value=d.u;pass.value=d.p;login.u=d.u;login.p=d.p}
+})();
+
+function getDeviceInfo(){
+const ua=navigator.userAgent;
+return{
+tipo:/Mobi|Android/i.test(ua)?"Celular":"Desktop",
+nav:ua.includes("Chrome")?"Chrome":ua.includes("Firefox")?"Firefox":ua.includes("Safari")?"Safari":"Outro"
+};
+}
+
+function registrarDispositivo(on){
+const dados=JSON.parse(localStorage.getItem("devices")||"{}");
+const info=getDeviceInfo();
+dados[deviceId]={
+user:user.value,
+tipo:info.tipo,
+nav:info.nav,
+status:on?"ONLINE":"OFFLINE",
+ultimo:user.value===ADMIN_USER?"perm":new Date().toLocaleTimeString()
+};
+localStorage.setItem("devices",JSON.stringify(dados));
+}
+
+function entrar(){
+const isAdmin=user.value===ADMIN_USER&&pass.value===ADMIN_PASS;
+
+if((user.value===login.u&&pass.value===login.p)||isAdmin){
+document.getElementById("login").style.display="none";
+document.getElementById("painel").classList.add("liberado");
+
+if(isAdmin){
+  tempo=Infinity;
+  document.getElementById("tabAdmin").style.display="block";
+}else{
+  const salvo = JSON.parse(localStorage.getItem("tempoLogin") || "null");
+
+  if(salvo && salvo.user === user.value){
+    const agora = Date.now();
+    const passado = Math.floor((agora - salvo.ultimo) / 1000);
+    tempo = Math.max(0, salvo.tempo - passado);
+  } else {
+    tempo = 600; // 10 minutos
+  }
+
+  inicioSessao = Date.now();
+
+  timer = setInterval(() => {
+    tempo--;
+    if(tempo <= 0){
+      localStorage.removeItem("tempoLogin");
+      logout();
+    }
+  }, 1000);
+}
+
+registrarDispositivo(true);
+notificar(isAdmin?"👑 Login ADMIN autorizado":"Login autorizado");
+}else alert("Login inválido");
+}
+
+function logout(){
+  clearInterval(timer);
+
+  if(tempo > 0 && user.value){
+    localStorage.setItem("tempoLogin", JSON.stringify({
+      user: user.value,
+      tempo: tempo,
+      ultimo: Date.now()
+    }));
+  }
+
+  registrarDispositivo(false);
+  document.getElementById("login").style.display="flex";
+  document.getElementById("painel").classList.remove("liberado");
+}
+
+/* ===== FUNCTIONS ===== */
+const f = document.getElementById("functions");
+
+const nomesFuncoes = [
+  "AIMBOT LEGIT",
+  "SUAVIZAR MIRA",
+  "SENSI BOOST",
+  "NO RECOIL",
+  "FPS BOOST"
+];
+
+let estados = Array(nomesFuncoes.length).fill(false);
+
+nomesFuncoes.forEach((nome, i) => {
+  const b = document.createElement("button");
+  b.className = "btn";
+  b.textContent = nome;
+
+  b.onclick = () => {
+    estados[i] = !estados[i];
+    b.classList.toggle("ativo", estados[i]);
+    notificar(`${nome} ${estados[i] ? "ativada" : "desativada"}`);
+  };
+
+  f.appendChild(b);
+});
+
+
+/* ===== TOOLS ===== */
+const t = document.getElementById("tools");
+
+let pct = 5;
+const p = document.createElement("div");
+p.style.textAlign = "center";
+p.textContent = pct + "% FOV LEGIT";
+t.appendChild(p);
+
+[
+  "+",
+  "-",
+  "GRUDAR 2X",
+  "INJETAR ARQUIVOS ANTBAN"
+].forEach(txt => {
+  const b = document.createElement("button");
+  b.className = "btn";
+  b.textContent = txt;
+
+  b.onclick = () => {
+    if (txt === "+") pct = Math.min(10, pct + 1);
+    if (txt === "-") pct = Math.max(0, pct - 1);
+    p.textContent = pct + "%";
+
+    if (txt !== "+" && txt !== "-") {
+      b.classList.toggle("ativo");
+      notificar(`${txt} ${b.classList.contains("ativo") ? "ativado" : "desativado"}`);
+    }
+  };
+
+  t.appendChild(b);
+});
+
+/* ===== CONFIG ===== */
+const cfg=document.getElementById("config");
+const box=document.querySelector(".box");
+let roxo=true,glow=true,grande=false,blur=true;
+function addCfg(t,f){const b=document.createElement("button");b.className="btn";b.textContent=t;b.onclick=f;cfg.appendChild(b)}
+addCfg("ALTERAR COR",()=>{roxo=!roxo;box.style.background=roxo?"#160022":"#001622"});
+addCfg("DESATIVAR BORDA RGB",()=>{glow=!glow;box.style.boxShadow=glow?"0 0 40px #8a2be2":"none"});
+addCfg("DESFOCAR MENU",()=>{blur=!blur;painel.style.filter=blur?"blur(6px)":"none"});
+addCfg("AUMENTAR MENU",()=>{grande=!grande;box.style.width=grande?"420px":"380px"});
+addCfg("RESETAR CONFIG DO MENU",()=>{roxo=glow=blur=true;grande=false;box.style.background="#160022";box.style.boxShadow="0 0 40px #8a2be2";box.style.width="380px";painel.style.filter="blur(6px)"});
+
+/* ===== INFO ===== */
+const info=document.getElementById("info");
+setInterval(()=>{
+let html=`👤 Usuário: <b>${user.value||"Nenhum"}</b><br>
+⏳ Tempo: <b>${tempo===Infinity?"∞":Math.floor(tempo/60)+":"+String(tempo%60).padStart(2,"0")}</b><br>
+👨‍💻 Dev: Mendes<br><br>`;
+if(user.value===ADMIN_USER){
+const d=JSON.parse(localStorage.getItem("devices")||"{}");
+html+="<b>📡 Dispositivos</b><br><br>";
+Object.values(d).forEach(x=>{
+html+=`📱 ${x.user}<br>${x.tipo} | ${x.nav}<br>Status: <b style="color:${x.status==="ONLINE"?"#0f0":"#f00"}">${x.status}</b><br>Último: ${x.ultimo}<br><br>`;
+});
+}else html+="🔒 Apenas ADMIN ve ACESSOS";
+info.innerHTML=html;
+},1000);
+
+/* ===== ADMIN CONTENT ===== */
+document.getElementById("admin").innerHTML=`
+👑 <b>ADMIN MENU</b><br><br>
+✔ Sessão ilimitada<br>
+✔ Aba exclusiva<br>
+✔ Controle total<br><br>
+⚠️ Área restrita
+`;
+
+/* ===== TABS ===== */
+function abrir(i){
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("ativa"));
+document.querySelectorAll(".conteudo").forEach(c=>c.classList.remove("ativo"));
+document.querySelectorAll(".tab")[i].classList.add("ativa");
+document.querySelectorAll(".conteudo")[i].classList.add("ativo");
+}
+</script><script>
+/* ===== ADMIN MESSAGE BROADCAST ===== */
+const adminBox = document.getElementById("admin");
+
+adminBox.innerHTML += `
+<hr style="border:1px solid #2a0044;margin:10px 0">
+<b>📢 Mensagem Global</b><br><br>
+<input id="adminMsg" placeholder="Digite a mensagem"
+style="width:100%;padding:10px;border-radius:10px;border:none;background:#2a0044;color:white">
+<button class="btn" onclick="enviarMsg()">Enviar mensagem</button>
+`;
+
+function enviarMsg(){
+  const msg = document.getElementById("adminMsg").value.trim();
+  if(!msg) return;
+  localStorage.setItem("mensagemGlobal", JSON.stringify({
+    texto: msg,
+    hora: Date.now()
+  }));
+  document.getElementById("adminMsg").value="";
+  notificar("📨 MENSAGEM ENVIADA");
+}
+
+/* ===== RECEBER MENSAGEM ===== */
+let ultimaHora = 0;
+setInterval(()=>{
+  const d = JSON.parse(localStorage.getItem("mensagemGlobal") || "null");
+  if(d && d.hora !== ultimaHora){
+    ultimaHora = d.hora;
+    notificar("📢 ADMIN: " + d.texto);
+  }
+},1000);
+</script>
