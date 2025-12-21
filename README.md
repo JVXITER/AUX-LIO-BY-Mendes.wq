@@ -1,2 +1,2 @@
-# AUX-LIO-BY-Mendes.wq
+# 👾 AUXÍLIO VIP 👿
  🎯 AUXÍLIO PARA MELHORAR SUA MIRA 🎯
